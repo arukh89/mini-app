@@ -3,7 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin TX Guesser - Real Data</title>
+    <title>Bitcoin Block Guesser</title>
+    
+    <!-- Farcaster Frame Meta Tags -->
+    <meta property="fc:frame" content="vNext" />
+    <meta property="fc:frame:image" content="https://mini-app-one-red.vercel.app/preview.png" />
+    <meta property="fc:frame:button:1" content="🎯 Play Game" />
+    <meta property="fc:frame:post_url" content="https://mini-app-one-red.vercel.app/" />
+    
+    <!-- Open Graph for better sharing -->
+    <meta property="og:title" content="Bitcoin Block Guesser" />
+    <meta property="og:description" content="Guess transaction counts in real Bitcoin blocks!" />
+    <meta property="og:image" content="https://mini-app-one-red.vercel.app/preview.png" />
+    
     <style>
         * {
             margin: 0;
@@ -12,136 +24,163 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 50%, #581c87 100%);
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
             color: white;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
+            padding: 16px;
+            overflow-x: hidden;
         }
 
-        .container {
-            background: rgba(255, 255, 255, 0.1);
+        .app {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 32px;
-            max-width: 420px;
-            width: 100%;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            animation: slideUp 0.6s ease-out;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            animation: fadeIn 0.8s ease-out;
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .header {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
         }
 
-        .bitcoin-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(45deg, #f7931a, #ffa500);
+        .logo {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(45deg, #f7931a, #ff8c00);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 16px;
+            font-size: 28px;
             font-weight: bold;
-            font-size: 24px;
-            animation: pulse 2s infinite;
+            animation: rotate 3s linear infinite;
+            box-shadow: 0 8px 32px rgba(247, 147, 26, 0.3);
         }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .title {
-            font-size: 24px;
-            font-weight: 700;
+            font-size: 26px;
+            font-weight: 800;
             margin-bottom: 8px;
-            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            background: linear-gradient(45deg, #f7931a, #ffd700);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
         .subtitle {
-            color: rgba(255, 255, 255, 0.8);
             font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 8px;
         }
 
-        .live-badge {
-            background: linear-gradient(45deg, #10b981, #059669);
-            color: white;
-            padding: 4px 12px;
+        .live-indicator {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            margin-top: 8px;
-            display: inline-block;
-            animation: glow 2s infinite;
+            border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
-            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background: #22c55e;
+            border-radius: 50%;
+            margin-right: 6px;
+            animation: blink 1.5s infinite;
         }
 
-        .game-area {
-            background: rgba(255, 255, 255, 0.05);
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+
+        .block-card {
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(247, 147, 26, 0.2);
+            position: relative;
+            overflow: hidden;
         }
 
-        .block-info {
-            text-align: center;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 12px;
-            border-left: 4px solid #f7931a;
+        .block-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #f7931a, #ffd700, #f7931a);
+            animation: shimmer 2s infinite;
         }
 
-        .block-number {
-            font-size: 18px;
-            font-weight: 600;
-            color: #fbbf24;
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .block-height {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f7931a;
             margin-bottom: 8px;
         }
 
-        .block-details {
+        .block-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.7);
-            line-height: 1.4;
+            color: rgba(255, 255, 255, 0.8);
         }
 
         .block-hash {
-            font-family: 'Courier New', monospace;
+            grid-column: 1 / -1;
+            font-family: 'Monaco', 'Courier New', monospace;
             font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
             word-break: break-all;
-            margin-top: 4px;
-            opacity: 0.6;
+            margin-top: 8px;
         }
 
-        .input-group {
-            margin-bottom: 20px;
+        .guess-section {
+            margin: 24px 0;
         }
 
-        .input-label {
-            display: block;
+        .guess-label {
+            font-size: 16px;
+            font-weight: 600;
             margin-bottom: 8px;
-            font-weight: 500;
-            font-size: 14px;
+            text-align: center;
         }
 
         .guess-input {
@@ -151,480 +190,528 @@
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.1);
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
+            font-weight: 600;
             transition: all 0.3s ease;
         }
 
         .guess-input:focus {
             outline: none;
             border-color: #f7931a;
-            box-shadow: 0 0 0 3px rgba(247, 147, 26, 0.2);
+            box-shadow: 0 0 0 4px rgba(247, 147, 26, 0.2);
+            transform: scale(1.02);
         }
 
         .guess-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
+            color: rgba(255, 255, 255, 0.4);
+            font-weight: normal;
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 8px 0;
+            position: relative;
+            overflow: hidden;
         }
 
         .submit-btn {
-            width: 100%;
-            padding: 16px;
-            background: linear-gradient(45deg, #f7931a, #ffa500);
-            border: none;
-            border-radius: 12px;
+            background: linear-gradient(45deg, #f7931a, #ff8c00);
             color: white;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 16px;
+            box-shadow: 0 4px 20px rgba(247, 147, 26, 0.3);
         }
 
         .submit-btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(247, 147, 26, 0.4);
+            box-shadow: 0 8px 30px rgba(247, 147, 26, 0.5);
         }
 
         .submit-btn:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+            transform: none;
         }
 
-        .result {
-            padding: 16px;
-            border-radius: 12px;
+        .next-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .next-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .result-card {
+            padding: 20px;
+            border-radius: 16px;
             text-align: center;
-            font-weight: 500;
-            margin-bottom: 16px;
-            animation: fadeIn 0.5s ease-out;
+            margin: 16px 0;
+            animation: slideIn 0.5s ease-out;
+            border: 1px solid;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
         }
 
-        .result.perfect {
-            background: linear-gradient(45deg, #10b981, #059669);
-            border: 1px solid #34d399;
+        .result-perfect {
+            background: linear-gradient(45deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.2));
+            border-color: #22c55e;
+            color: #86efac;
         }
 
-        .result.excellent {
-            background: linear-gradient(45deg, #22c55e, #16a34a);
-            border: 1px solid #4ade80;
+        .result-close {
+            background: linear-gradient(45deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.2));
+            border-color: #f59e0b;
+            color: #fbbf24;
         }
 
-        .result.good {
-            background: linear-gradient(45deg, #f59e0b, #d97706);
-            border: 1px solid #fbbf24;
+        .result-far {
+            background: linear-gradient(45deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2));
+            border-color: #ef4444;
+            color: #fca5a5;
         }
 
-        .result.okay {
-            background: linear-gradient(45deg, #f97316, #ea580c);
-            border: 1px solid #fb923c;
+        .result-emoji {
+            font-size: 32px;
+            margin-bottom: 8px;
+            display: block;
         }
 
-        .result.far {
-            background: linear-gradient(45deg, #ef4444, #dc2626);
-            border: 1px solid #f87171;
+        .result-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
-        .stats {
+        .result-details {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .stats-grid {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 12px;
-            margin-top: 16px;
+            margin-top: 20px;
         }
 
-        .stat-item {
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 8px;
+        .stat-card {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 16px;
+            border-radius: 12px;
             text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .stat-value {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fbbf24;
+            font-size: 22px;
+            font-weight: 800;
+            color: #f7931a;
+            display: block;
+            margin-bottom: 4px;
         }
 
         .stat-label {
             font-size: 11px;
             color: rgba(255, 255, 255, 0.7);
-            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .new-round-btn {
-            width: 100%;
-            padding: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .new-round-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .loading {
+        .loading-state {
             text-align: center;
-            padding: 20px;
-            color: rgba(255, 255, 255, 0.7);
+            padding: 40px 20px;
         }
 
-        .loading::after {
-            content: '';
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid #f7931a;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(247, 147, 26, 0.3);
+            border-top: 3px solid #f7931a;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-left: 10px;
+            margin: 0 auto 16px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .difficulty-hint {
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.6);
+        .error-state {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 12px;
+            padding: 16px;
             text-align: center;
-            margin-top: 8px;
-        }
-
-        .mempool-credit {
-            text-align: center;
-            font-size: 10px;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 16px;
-        }
-
-        .error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
             color: #fca5a5;
-            padding: 12px;
-            border-radius: 8px;
-            text-align: center;
             margin: 16px 0;
+        }
+
+        .mempool-link {
+            color: #f7931a;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .mempool-link:hover {
+            text-decoration: underline;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="app">
         <div class="header">
-            <div class="bitcoin-icon">₿</div>
-            <h1 class="title">Bitcoin TX Guesser</h1>
+            <div class="logo">₿</div>
+            <h1 class="title">Bitcoin Block Guesser</h1>
             <p class="subtitle">Guess transactions in real Bitcoin blocks</p>
-            <div class="live-badge">🔴 LIVE DATA</div>
+            <div class="live-indicator">
+                <span class="live-dot"></span>
+                LIVE BLOCKCHAIN DATA
+            </div>
         </div>
 
-        <div class="game-area">
-            <div class="block-info">
-                <div class="block-number" id="blockNumber">Loading...</div>
-                <div class="block-details" id="blockDetails">Fetching real Bitcoin block...</div>
-                <div class="block-hash" id="blockHash"></div>
+        <div id="gameArea">
+            <div class="loading-state" id="loadingState">
+                <div class="loading-spinner"></div>
+                <div>Loading real Bitcoin block...</div>
             </div>
-
-            <div class="input-group">
-                <label class="input-label" for="guess">Your Guess (Number of Transactions):</label>
-                <input 
-                    type="number" 
-                    id="guess" 
-                    class="guess-input" 
-                    placeholder="Enter your guess..."
-                    min="1"
-                    max="10000"
-                >
-                <div class="difficulty-hint">💡 Recent blocks: 1,500-4,500 transactions</div>
-            </div>
-
-            <button class="submit-btn" id="submitBtn" onclick="submitGuess()">
-                🎯 Submit Guess
-            </button>
-
-            <div id="result" style="display: none;"></div>
-            <div id="error" style="display: none;"></div>
-            
-            <button class="new-round-btn" id="newRoundBtn" onclick="newRound()" style="display: none;">
-                🔄 Try Another Real Block
-            </button>
         </div>
 
-        <div class="stats">
-            <div class="stat-item">
-                <div class="stat-value" id="correctGuesses">0</div>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value" id="perfectCount">0</span>
                 <div class="stat-label">Perfect</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalGuesses">0</div>
-                <div class="stat-label">Total</div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalCount">0</span>
+                <div class="stat-label">Played</div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="accuracy">0%</div>
-                <div class="stat-label">Accuracy</div>
+            <div class="stat-card">
+                <span class="stat-value" id="accuracyRate">0%</span>
+                <div class="stat-label">Success</div>
             </div>
         </div>
 
-        <div class="mempool-credit">
-            Powered by mempool.space API
+        <div class="footer">
+            Data from <a href="https://mempool.space" target="_blank" class="mempool-link">mempool.space</a>
         </div>
     </div>
 
+    <!-- Real Farcaster SDK -->
     <script type="module">
-        // Farcaster Mini App SDK
-        const sdk = {
-            actions: {
-                ready: async () => {
-                    console.log('✅ Farcaster Mini App Ready!');
-                    return true;
-                },
-                close: () => console.log('Mini app closed'),
-                openUrl: (url) => window.open(url, '_blank')
-            },
-            context: {
-                user: { fid: 12345, username: 'farcaster_user' }
+        import { sdk } from 'https://esm.sh/@farcaster/miniapp-sdk'
+
+        // Global game state
+        const game = {
+            currentBlock: null,
+            isLoading: false,
+            stats: {
+                perfect: parseInt(localStorage.getItem('btc_perfect_v2') || '0'),
+                total: parseInt(localStorage.getItem('btc_total_v2') || '0')
             }
         };
 
-        // Game state
-        let gameState = {
-            currentBlock: null,
-            actualTxCount: 0,
-            correctGuesses: parseInt(localStorage.getItem('btc_perfect') || '0'),
-            totalGuesses: parseInt(localStorage.getItem('btc_total_real') || '0'),
-            isLoading: false
-        };
+        // Mempool.space API
+        const API_BASE = 'https://mempool.space/api';
 
-        // Mempool.space API endpoints
-        const MEMPOOL_API = 'https://mempool.space/api';
+        // Initialize Farcaster Mini App
+        async function initFarcasterApp() {
+            try {
+                console.log('🚀 Initializing Farcaster Mini App...');
+                await sdk.actions.ready();
+                console.log('✅ Farcaster SDK ready!');
+                return true;
+            } catch (error) {
+                console.error('❌ Farcaster SDK error:', error);
+                return false;
+            }
+        }
 
         // Fetch real Bitcoin block data
-        async function fetchRealBitcoinBlock() {
-            gameState.isLoading = true;
-            
+        async function fetchRealBlock() {
+            game.isLoading = true;
+            showLoadingState();
+
             try {
-                showLoading();
-                
+                console.log('📡 Fetching real Bitcoin data...');
+
                 // Get latest block height
-                console.log('📡 Fetching latest block height...');
-                const heightResponse = await fetch(`${MEMPOOL_API}/blocks/tip/height`);
-                const latestHeight = await heightResponse.json();
-                
-                // Get a random recent block (last 100 blocks)
-                const randomOffset = Math.floor(Math.random() * 100);
+                const heightRes = await fetch(`${API_BASE}/blocks/tip/height`);
+                if (!heightRes.ok) throw new Error('Failed to fetch block height');
+                const latestHeight = await heightRes.json();
+
+                // Get random recent block (last 50 blocks for recent data)
+                const randomOffset = Math.floor(Math.random() * 50);
                 const targetHeight = latestHeight - randomOffset;
-                
-                console.log(`🎯 Fetching block ${targetHeight}...`);
-                
-                // Get block hash for this height
-                const hashResponse = await fetch(`${MEMPOOL_API}/block-height/${targetHeight}`);
-                const blockHash = await hashResponse.text();
-                
-                // Get full block details
-                const blockResponse = await fetch(`${MEMPOOL_API}/block/${blockHash}`);
-                const blockData = await blockResponse.json();
-                
-                console.log('✅ Block data received:', blockData);
-                
-                gameState.currentBlock = {
+
+                // Get block hash
+                const hashRes = await fetch(`${API_BASE}/block-height/${targetHeight}`);
+                if (!hashRes.ok) throw new Error('Failed to fetch block hash');
+                const blockHash = await hashRes.text();
+
+                // Get full block data
+                const blockRes = await fetch(`${API_BASE}/block/${blockHash}`);
+                if (!blockRes.ok) throw new Error('Failed to fetch block data');
+                const blockData = await blockRes.json();
+
+                game.currentBlock = {
                     height: blockData.height,
                     hash: blockData.id,
                     timestamp: new Date(blockData.timestamp * 1000),
                     txCount: blockData.tx_count,
                     size: blockData.size,
-                    weight: blockData.weight
+                    weight: blockData.weight,
+                    difficulty: blockData.difficulty
                 };
-                
-                gameState.actualTxCount = blockData.tx_count;
-                gameState.isLoading = false;
-                
-                displayRealBlockInfo();
-                
+
+                console.log('✅ Real block loaded:', game.currentBlock);
+                showGameInterface();
+
             } catch (error) {
                 console.error('❌ Error fetching block:', error);
-                showError('Failed to load real Bitcoin data. Please try again!');
-                gameState.isLoading = false;
+                showErrorState('Failed to load Bitcoin block. Please try again!');
             }
+
+            game.isLoading = false;
         }
 
-        function showLoading() {
-            document.getElementById('blockNumber').innerHTML = '🔄 Loading Real Block...';
-            document.getElementById('blockDetails').innerHTML = 'Fetching from Bitcoin network...';
-            document.getElementById('blockHash').innerHTML = '';
-            document.getElementById('submitBtn').disabled = true;
+        // Show loading state
+        function showLoadingState() {
+            document.getElementById('gameArea').innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <div>Loading real Bitcoin block...</div>
+                    <div style="font-size: 12px; margin-top: 8px; opacity: 0.7;">
+                        Fetching from mempool.space
+                    </div>
+                </div>
+            `;
         }
 
-        function showError(message) {
-            const errorDiv = document.getElementById('error');
-            errorDiv.innerHTML = `⚠️ ${message}`;
-            errorDiv.style.display = 'block';
-            errorDiv.className = 'error';
-            
-            // Hide after 5 seconds
-            setTimeout(() => {
-                errorDiv.style.display = 'none';
-            }, 5000);
+        // Show error state
+        function showErrorState(message) {
+            document.getElementById('gameArea').innerHTML = `
+                <div class="error-state">
+                    ⚠️ ${message}
+                    <br><br>
+                    <button class="action-btn next-btn" onclick="startNewRound()">
+                        🔄 Try Again
+                    </button>
+                </div>
+            `;
         }
 
-        function displayRealBlockInfo() {
-            const block = gameState.currentBlock;
-            document.getElementById('blockNumber').innerHTML = 
-                `Block #${block.height.toLocaleString()}`;
-            
+        // Show main game interface
+        function showGameInterface() {
+            const block = game.currentBlock;
             const timeAgo = getTimeAgo(block.timestamp);
-            document.getElementById('blockDetails').innerHTML = 
-                `⏰ Mined ${timeAgo}<br>📦 Size: ${(block.size/1000).toFixed(1)}KB • Weight: ${(block.weight/1000).toFixed(0)}K`;
-            
-            document.getElementById('blockHash').innerHTML = 
-                `${block.hash.substring(0, 32)}...`;
-            
-            document.getElementById('submitBtn').disabled = false;
-            document.getElementById('error').style.display = 'none';
+
+            document.getElementById('gameArea').innerHTML = `
+                <div class="block-card">
+                    <div class="block-height">Block #${block.height.toLocaleString()}</div>
+                    <div class="block-info-grid">
+                        <div>⏰ ${timeAgo}</div>
+                        <div>📦 ${(block.size/1000).toFixed(1)} KB</div>
+                        <div>⚖️ ${(block.weight/1000).toFixed(0)}K WU</div>
+                        <div>🔗 <a href="https://mempool.space/block/${block.hash}" target="_blank" class="mempool-link">View Block</a></div>
+                        <div class="block-hash">${block.hash}</div>
+                    </div>
+                </div>
+
+                <div class="guess-section">
+                    <div class="guess-label">How many transactions in this block?</div>
+                    <input 
+                        type="number" 
+                        id="guessInput" 
+                        class="guess-input" 
+                        placeholder="Enter your guess..."
+                        min="1" 
+                        max="20000"
+                        autofocus
+                    />
+                    <div class="hint">
+                        💡 Recent blocks typically have 1,500-4,500 transactions
+                    </div>
+                </div>
+
+                <button class="action-btn submit-btn" onclick="submitGuess()">
+                    🎯 Submit Guess
+                </button>
+            `;
+
+            // Add enter key listener
+            document.getElementById('guessInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') submitGuess();
+            });
         }
 
-        function getTimeAgo(date) {
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-            
-            if (diffMins < 60) return `${diffMins} minutes ago`;
-            if (diffHours < 24) return `${diffHours} hours ago`;
-            return `${diffDays} days ago`;
-        }
-
-        function updateStats() {
-            document.getElementById('correctGuesses').textContent = gameState.correctGuesses;
-            document.getElementById('totalGuesses').textContent = gameState.totalGuesses;
-            
-            const accuracy = gameState.totalGuesses > 0 
-                ? Math.round((gameState.correctGuesses / gameState.totalGuesses) * 100)
-                : 0;
-            document.getElementById('accuracy').textContent = `${accuracy}%`;
-        }
-
-        async function submitGuess() {
-            const guessInput = document.getElementById('guess');
+        // Submit guess and show result
+        function submitGuess() {
+            const guessInput = document.getElementById('guessInput');
             const guess = parseInt(guessInput.value);
-            
+
             if (!guess || guess < 1) {
-                showError('Please enter a valid number of transactions!');
+                guessInput.style.borderColor = '#ef4444';
+                setTimeout(() => {
+                    guessInput.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }, 1000);
                 return;
             }
 
-            gameState.totalGuesses++;
-            const difference = Math.abs(guess - gameState.actualTxCount);
-            const percentageOff = (difference / gameState.actualTxCount) * 100;
-            
-            let resultClass, resultText, isCorrect = false;
-            
+            const actual = game.currentBlock.txCount;
+            const difference = Math.abs(guess - actual);
+            const percentOff = (difference / actual) * 100;
+
+            // Update stats
+            game.stats.total++;
+            let resultClass, emoji, title, isPerfect = false;
+
             if (difference === 0) {
                 resultClass = 'perfect';
-                resultText = '🎯 PERFECT! Exactly right!';
-                isCorrect = true;
-            } else if (percentageOff <= 2) {
-                resultClass = 'excellent';
-                resultText = `🔥 AMAZING! Only ${difference} off!`;
-                isCorrect = true;
-            } else if (percentageOff <= 5) {
-                resultClass = 'excellent';
-                resultText = `🎉 EXCELLENT! Off by ${difference}`;
-                isCorrect = true;
-            } else if (percentageOff <= 10) {
-                resultClass = 'good';
-                resultText = `👍 GOOD! Off by ${difference}`;
-            } else if (percentageOff <= 25) {
-                resultClass = 'okay';
-                resultText = `📈 CLOSE! Off by ${difference}`;
+                emoji = '🎯';
+                title = 'PERFECT!';
+                isPerfect = true;
+            } else if (percentOff <= 3) {
+                resultClass = 'perfect';
+                emoji = '🔥';
+                title = 'AMAZING!';
+                isPerfect = true;
+            } else if (percentOff <= 8) {
+                resultClass = 'close';
+                emoji = '🎉';
+                title = 'EXCELLENT!';
+                isPerfect = true;
+            } else if (percentOff <= 15) {
+                resultClass = 'close';
+                emoji = '👍';
+                title = 'GOOD!';
+            } else if (percentOff <= 30) {
+                resultClass = 'close';
+                emoji = '📈';
+                title = 'CLOSE!';
             } else {
                 resultClass = 'far';
-                resultText = `💪 KEEP TRYING! Off by ${difference}`;
+                emoji = '💪';
+                title = 'KEEP TRYING!';
             }
 
-            if (isCorrect) gameState.correctGuesses++;
+            if (isPerfect) game.stats.perfect++;
 
-            // Save stats to localStorage
-            localStorage.setItem('btc_perfect', gameState.correctGuesses.toString());
-            localStorage.setItem('btc_total_real', gameState.totalGuesses.toString());
+            // Save stats
+            localStorage.setItem('btc_perfect_v2', game.stats.perfect.toString());
+            localStorage.setItem('btc_total_v2', game.stats.total.toString());
 
-            // Display result with real block info
-            const resultDiv = document.getElementById('result');
-            resultDiv.className = `result ${resultClass}`;
-            resultDiv.innerHTML = `
-                ${resultText}<br>
-                <strong>Actual: ${gameState.actualTxCount.toLocaleString()} transactions</strong><br>
-                <small>Your guess: ${guess.toLocaleString()} • Accuracy: ${(100-percentageOff).toFixed(1)}%</small><br>
-                <small>🔗 <a href="https://mempool.space/block/${gameState.currentBlock.hash}" target="_blank" style="color: #fbbf24;">View on mempool.space</a></small>
+            // Show result
+            const accuracy = ((100 - percentOff).toFixed(1));
+            document.getElementById('gameArea').innerHTML = `
+                <div class="block-card">
+                    <div class="block-height">Block #${game.currentBlock.height.toLocaleString()}</div>
+                    <div class="block-info-grid">
+                        <div>⏰ ${getTimeAgo(game.currentBlock.timestamp)}</div>
+                        <div>📦 ${(game.currentBlock.size/1000).toFixed(1)} KB</div>
+                        <div class="block-hash">${game.currentBlock.hash}</div>
+                    </div>
+                </div>
+
+                <div class="result-card result-${resultClass}">
+                    <span class="result-emoji">${emoji}</span>
+                    <div class="result-text">${title}</div>
+                    <div class="result-details">
+                        <strong>Actual: ${actual.toLocaleString()} transactions</strong><br>
+                        Your guess: ${guess.toLocaleString()} (${accuracy}% accurate)<br>
+                        Difference: ${difference.toLocaleString()}
+                    </div>
+                </div>
+
+                <button class="action-btn next-btn" onclick="startNewRound()">
+                    🔄 Try Another Block
+                </button>
             `;
-            resultDiv.style.display = 'block';
 
-            // Show new round button
-            document.getElementById('newRoundBtn').style.display = 'block';
-            document.getElementById('submitBtn').style.display = 'none';
-            guessInput.disabled = true;
-            
-            updateStats();
+            updateStatsDisplay();
         }
 
-        async function newRound() {
-            // Reset UI
-            document.getElementById('result').style.display = 'none';
-            document.getElementById('error').style.display = 'none';
-            document.getElementById('newRoundBtn').style.display = 'none';
-            document.getElementById('submitBtn').style.display = 'block';
-            document.getElementById('guess').disabled = false;
-            document.getElementById('guess').value = '';
-            
-            // Fetch new real block
-            await fetchRealBitcoinBlock();
+        // Start new round
+        function startNewRound() {
+            fetchRealBlock();
         }
 
-        // Initialize the mini app
-        async function initApp() {
-            console.log('🚀 Initializing Real Bitcoin TX Guesser...');
+        // Helper functions
+        function getTimeAgo(date) {
+            const diffMs = Date.now() - date.getTime();
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
             
-            try {
-                // Initialize Farcaster SDK
-                await sdk.actions.ready();
-                console.log('✅ Farcaster SDK ready');
-                
-                // Load saved stats
-                updateStats();
-                
-                // Fetch first real block
-                await fetchRealBitcoinBlock();
-                
-                // Add enter key support
-                document.getElementById('guess').addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter' && !gameState.isLoading && !document.getElementById('guess').disabled) {
-                        submitGuess();
-                    }
-                });
-                
-                console.log('🎉 Mini app fully loaded with real Bitcoin data!');
-                
-            } catch (error) {
-                console.error('❌ Error initializing app:', error);
-                showError('Failed to initialize app. Refresh to try again.');
-            }
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            return `${Math.floor(diffHours / 24)}d ago`;
         }
 
-        // Make functions global for HTML access
+        function updateStatsDisplay() {
+            document.getElementById('perfectCount').textContent = game.stats.perfect;
+            document.getElementById('totalCount').textContent = game.stats.total;
+            
+            const successRate = game.stats.total > 0 
+                ? Math.round((game.stats.perfect / game.stats.total) * 100)
+                : 0;
+            document.getElementById('accuracyRate').textContent = `${successRate}%`;
+        }
+
+        // Make functions global for onclick handlers
         window.submitGuess = submitGuess;
-        window.newRound = newRound;
+        window.startNewRound = startNewRound;
+
+        // Initialize the app
+        async function init() {
+            console.log('🎮 Starting Bitcoin Block Guesser...');
+            
+            // Initialize Farcaster
+            const fcReady = await initFarcasterApp();
+            if (fcReady) {
+                console.log('🌟 Farcaster integration active!');
+            }
+
+            // Load stats and start first round
+            updateStatsDisplay();
+            await fetchRealBlock();
+        }
 
         // Start the app
-        initApp();
+        init();
     </script>
 </body>
-                    </html>
+</html>
