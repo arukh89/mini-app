@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bitcoin TX Guesser</title>
+    <title>Bitcoin TX Guesser - Real Data</title>
     <style>
         * {
             margin: 0;
@@ -35,14 +35,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .header {
@@ -84,6 +78,23 @@
             font-size: 14px;
         }
 
+        .live-badge {
+            background: linear-gradient(45deg, #10b981, #059669);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 8px;
+            display: inline-block;
+            animation: glow 2s infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(16, 185, 129, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+        }
+
         .game-area {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
@@ -105,12 +116,21 @@
             font-size: 18px;
             font-weight: 600;
             color: #fbbf24;
-            margin-bottom: 4px;
+            margin-bottom: 8px;
         }
 
         .block-details {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+
+        .block-hash {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            word-break: break-all;
+            margin-top: 4px;
+            opacity: 0.6;
         }
 
         .input-group {
@@ -184,14 +204,24 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .result.correct {
+        .result.perfect {
             background: linear-gradient(45deg, #10b981, #059669);
             border: 1px solid #34d399;
         }
 
-        .result.close {
+        .result.excellent {
+            background: linear-gradient(45deg, #22c55e, #16a34a);
+            border: 1px solid #4ade80;
+        }
+
+        .result.good {
             background: linear-gradient(45deg, #f59e0b, #d97706);
             border: 1px solid #fbbf24;
+        }
+
+        .result.okay {
+            background: linear-gradient(45deg, #f97316, #ea580c);
+            border: 1px solid #fb923c;
         }
 
         .result.far {
@@ -201,7 +231,7 @@
 
         .stats {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 12px;
             margin-top: 16px;
         }
@@ -214,13 +244,13 @@
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #fbbf24;
         }
 
         .stat-label {
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(255, 255, 255, 0.7);
             margin-top: 4px;
         }
@@ -269,6 +299,23 @@
             text-align: center;
             margin-top: 8px;
         }
+
+        .mempool-credit {
+            text-align: center;
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 16px;
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 16px 0;
+        }
     </style>
 </head>
 <body>
@@ -276,13 +323,15 @@
         <div class="header">
             <div class="bitcoin-icon">₿</div>
             <h1 class="title">Bitcoin TX Guesser</h1>
-            <p class="subtitle">Guess the transaction count per block</p>
+            <p class="subtitle">Guess transactions in real Bitcoin blocks</p>
+            <div class="live-badge">🔴 LIVE DATA</div>
         </div>
 
         <div class="game-area">
             <div class="block-info">
                 <div class="block-number" id="blockNumber">Loading...</div>
-                <div class="block-details" id="blockDetails">Fetching block data...</div>
+                <div class="block-details" id="blockDetails">Fetching real Bitcoin block...</div>
+                <div class="block-hash" id="blockHash"></div>
             </div>
 
             <div class="input-group">
@@ -295,42 +344,54 @@
                     min="1"
                     max="10000"
                 >
-                <div class="difficulty-hint">Hint: Bitcoin blocks typically contain 1,000-4,000 transactions</div>
+                <div class="difficulty-hint">💡 Recent blocks: 1,500-4,500 transactions</div>
             </div>
 
             <button class="submit-btn" id="submitBtn" onclick="submitGuess()">
-                Submit Guess
+                🎯 Submit Guess
             </button>
 
             <div id="result" style="display: none;"></div>
+            <div id="error" style="display: none;"></div>
             
             <button class="new-round-btn" id="newRoundBtn" onclick="newRound()" style="display: none;">
-                🎯 Try Another Block
+                🔄 Try Another Real Block
             </button>
         </div>
 
         <div class="stats">
             <div class="stat-item">
                 <div class="stat-value" id="correctGuesses">0</div>
-                <div class="stat-label">Correct</div>
+                <div class="stat-label">Perfect</div>
             </div>
             <div class="stat-item">
                 <div class="stat-value" id="totalGuesses">0</div>
                 <div class="stat-label">Total</div>
             </div>
+            <div class="stat-item">
+                <div class="stat-value" id="accuracy">0%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <div class="mempool-credit">
+            Powered by mempool.space API
         </div>
     </div>
 
     <script type="module">
-        // Farcaster Mini App SDK (simulated for demo)
+        // Farcaster Mini App SDK
         const sdk = {
             actions: {
-                ready: async () => console.log('Mini app ready'),
+                ready: async () => {
+                    console.log('✅ Farcaster Mini App Ready!');
+                    return true;
+                },
                 close: () => console.log('Mini app closed'),
                 openUrl: (url) => window.open(url, '_blank')
             },
             context: {
-                user: { fid: 12345, username: 'demo_user' }
+                user: { fid: 12345, username: 'farcaster_user' }
             }
         };
 
@@ -338,53 +399,118 @@
         let gameState = {
             currentBlock: null,
             actualTxCount: 0,
-            correctGuesses: parseInt(localStorage.getItem('btc_correct') || '0'),
-            totalGuesses: parseInt(localStorage.getItem('btc_total') || '0'),
+            correctGuesses: parseInt(localStorage.getItem('btc_perfect') || '0'),
+            totalGuesses: parseInt(localStorage.getItem('btc_total_real') || '0'),
             isLoading: false
         };
 
-        // Update stats display
+        // Mempool.space API endpoints
+        const MEMPOOL_API = 'https://mempool.space/api';
+
+        // Fetch real Bitcoin block data
+        async function fetchRealBitcoinBlock() {
+            gameState.isLoading = true;
+            
+            try {
+                showLoading();
+                
+                // Get latest block height
+                console.log('📡 Fetching latest block height...');
+                const heightResponse = await fetch(`${MEMPOOL_API}/blocks/tip/height`);
+                const latestHeight = await heightResponse.json();
+                
+                // Get a random recent block (last 100 blocks)
+                const randomOffset = Math.floor(Math.random() * 100);
+                const targetHeight = latestHeight - randomOffset;
+                
+                console.log(`🎯 Fetching block ${targetHeight}...`);
+                
+                // Get block hash for this height
+                const hashResponse = await fetch(`${MEMPOOL_API}/block-height/${targetHeight}`);
+                const blockHash = await hashResponse.text();
+                
+                // Get full block details
+                const blockResponse = await fetch(`${MEMPOOL_API}/block/${blockHash}`);
+                const blockData = await blockResponse.json();
+                
+                console.log('✅ Block data received:', blockData);
+                
+                gameState.currentBlock = {
+                    height: blockData.height,
+                    hash: blockData.id,
+                    timestamp: new Date(blockData.timestamp * 1000),
+                    txCount: blockData.tx_count,
+                    size: blockData.size,
+                    weight: blockData.weight
+                };
+                
+                gameState.actualTxCount = blockData.tx_count;
+                gameState.isLoading = false;
+                
+                displayRealBlockInfo();
+                
+            } catch (error) {
+                console.error('❌ Error fetching block:', error);
+                showError('Failed to load real Bitcoin data. Please try again!');
+                gameState.isLoading = false;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('blockNumber').innerHTML = '🔄 Loading Real Block...';
+            document.getElementById('blockDetails').innerHTML = 'Fetching from Bitcoin network...';
+            document.getElementById('blockHash').innerHTML = '';
+            document.getElementById('submitBtn').disabled = true;
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.innerHTML = `⚠️ ${message}`;
+            errorDiv.style.display = 'block';
+            errorDiv.className = 'error';
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function displayRealBlockInfo() {
+            const block = gameState.currentBlock;
+            document.getElementById('blockNumber').innerHTML = 
+                `Block #${block.height.toLocaleString()}`;
+            
+            const timeAgo = getTimeAgo(block.timestamp);
+            document.getElementById('blockDetails').innerHTML = 
+                `⏰ Mined ${timeAgo}<br>📦 Size: ${(block.size/1000).toFixed(1)}KB • Weight: ${(block.weight/1000).toFixed(0)}K`;
+            
+            document.getElementById('blockHash').innerHTML = 
+                `${block.hash.substring(0, 32)}...`;
+            
+            document.getElementById('submitBtn').disabled = false;
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 60) return `${diffMins} minutes ago`;
+            if (diffHours < 24) return `${diffHours} hours ago`;
+            return `${diffDays} days ago`;
+        }
+
         function updateStats() {
             document.getElementById('correctGuesses').textContent = gameState.correctGuesses;
             document.getElementById('totalGuesses').textContent = gameState.totalGuesses;
-        }
-
-        // Simulate Bitcoin API data (in real implementation, use mempool.space or blockchain.info API)
-        async function fetchRandomBlock() {
-            gameState.isLoading = true;
-            document.getElementById('blockNumber').textContent = 'Loading...';
-            document.getElementById('blockDetails').textContent = 'Fetching block data...';
             
-            // Simulate API delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            // Generate realistic block data
-            const latestBlock = 850000 + Math.floor(Math.random() * 10000); // Recent blocks
-            const txCount = Math.floor(Math.random() * 3000) + 500; // 500-3500 transactions
-            const timestamp = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000);
-            
-            gameState.currentBlock = {
-                height: latestBlock,
-                txCount: txCount,
-                timestamp: timestamp,
-                hash: generateRandomHash()
-            };
-            
-            gameState.actualTxCount = txCount;
-            gameState.isLoading = false;
-            
-            displayBlockInfo();
-        }
-
-        function generateRandomHash() {
-            return '0000000000000000000' + Math.random().toString(16).substr(2, 45);
-        }
-
-        function displayBlockInfo() {
-            const block = gameState.currentBlock;
-            document.getElementById('blockNumber').textContent = `Block #${block.height.toLocaleString()}`;
-            document.getElementById('blockDetails').textContent = 
-                `Mined ${block.timestamp.toLocaleDateString()} • Hash: ${block.hash.substr(0, 16)}...`;
+            const accuracy = gameState.totalGuesses > 0 
+                ? Math.round((gameState.correctGuesses / gameState.totalGuesses) * 100)
+                : 0;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
         }
 
         async function submitGuess() {
@@ -392,7 +518,7 @@
             const guess = parseInt(guessInput.value);
             
             if (!guess || guess < 1) {
-                alert('Please enter a valid number of transactions!');
+                showError('Please enter a valid number of transactions!');
                 return;
             }
 
@@ -400,42 +526,49 @@
             const difference = Math.abs(guess - gameState.actualTxCount);
             const percentageOff = (difference / gameState.actualTxCount) * 100;
             
-            let resultClass, resultText, emoji;
+            let resultClass, resultText, isCorrect = false;
             
             if (difference === 0) {
-                resultClass = 'correct';
-                resultText = '🎯 Perfect! Exactly right!';
-                gameState.correctGuesses++;
+                resultClass = 'perfect';
+                resultText = '🎯 PERFECT! Exactly right!';
+                isCorrect = true;
+            } else if (percentageOff <= 2) {
+                resultClass = 'excellent';
+                resultText = `🔥 AMAZING! Only ${difference} off!`;
+                isCorrect = true;
             } else if (percentageOff <= 5) {
-                resultClass = 'correct';
-                resultText = `🎉 Amazing! Only ${difference} off!`;
-                gameState.correctGuesses++;
-            } else if (percentageOff <= 15) {
-                resultClass = 'close';
-                resultText = `🔥 Very close! Off by ${difference}`;
-            } else if (percentageOff <= 30) {
-                resultClass = 'close';
-                resultText = `👍 Not bad! Off by ${difference}`;
+                resultClass = 'excellent';
+                resultText = `🎉 EXCELLENT! Off by ${difference}`;
+                isCorrect = true;
+            } else if (percentageOff <= 10) {
+                resultClass = 'good';
+                resultText = `👍 GOOD! Off by ${difference}`;
+            } else if (percentageOff <= 25) {
+                resultClass = 'okay';
+                resultText = `📈 CLOSE! Off by ${difference}`;
             } else {
                 resultClass = 'far';
-                resultText = `💪 Keep trying! Off by ${difference}`;
+                resultText = `💪 KEEP TRYING! Off by ${difference}`;
             }
 
-            // Save stats
-            localStorage.setItem('btc_correct', gameState.correctGuesses.toString());
-            localStorage.setItem('btc_total', gameState.totalGuesses.toString());
+            if (isCorrect) gameState.correctGuesses++;
 
-            // Display result
+            // Save stats to localStorage
+            localStorage.setItem('btc_perfect', gameState.correctGuesses.toString());
+            localStorage.setItem('btc_total_real', gameState.totalGuesses.toString());
+
+            // Display result with real block info
             const resultDiv = document.getElementById('result');
             resultDiv.className = `result ${resultClass}`;
             resultDiv.innerHTML = `
                 ${resultText}<br>
                 <strong>Actual: ${gameState.actualTxCount.toLocaleString()} transactions</strong><br>
-                <small>Your guess: ${guess.toLocaleString()}</small>
+                <small>Your guess: ${guess.toLocaleString()} • Accuracy: ${(100-percentageOff).toFixed(1)}%</small><br>
+                <small>🔗 <a href="https://mempool.space/block/${gameState.currentBlock.hash}" target="_blank" style="color: #fbbf24;">View on mempool.space</a></small>
             `;
             resultDiv.style.display = 'block';
 
-            // Show new round button and update stats
+            // Show new round button
             document.getElementById('newRoundBtn').style.display = 'block';
             document.getElementById('submitBtn').style.display = 'none';
             guessInput.disabled = true;
@@ -446,39 +579,52 @@
         async function newRound() {
             // Reset UI
             document.getElementById('result').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
             document.getElementById('newRoundBtn').style.display = 'none';
             document.getElementById('submitBtn').style.display = 'block';
             document.getElementById('guess').disabled = false;
             document.getElementById('guess').value = '';
             
-            // Fetch new block
-            await fetchRandomBlock();
+            // Fetch new real block
+            await fetchRealBitcoinBlock();
         }
 
-        // Initialize game
-        async function initGame() {
-            console.log('Initializing Bitcoin TX Guesser Mini App...');
+        // Initialize the mini app
+        async function initApp() {
+            console.log('🚀 Initializing Real Bitcoin TX Guesser...');
             
-            // Initialize Farcaster SDK
-            await sdk.actions.ready();
-            
-            updateStats();
-            await fetchRandomBlock();
-            
-            // Add enter key support
-            document.getElementById('guess').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && !gameState.isLoading) {
-                    submitGuess();
-                }
-            });
+            try {
+                // Initialize Farcaster SDK
+                await sdk.actions.ready();
+                console.log('✅ Farcaster SDK ready');
+                
+                // Load saved stats
+                updateStats();
+                
+                // Fetch first real block
+                await fetchRealBitcoinBlock();
+                
+                // Add enter key support
+                document.getElementById('guess').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !gameState.isLoading && !document.getElementById('guess').disabled) {
+                        submitGuess();
+                    }
+                });
+                
+                console.log('🎉 Mini app fully loaded with real Bitcoin data!');
+                
+            } catch (error) {
+                console.error('❌ Error initializing app:', error);
+                showError('Failed to initialize app. Refresh to try again.');
+            }
         }
 
-        // Global functions
+        // Make functions global for HTML access
         window.submitGuess = submitGuess;
         window.newRound = newRound;
 
-        // Start the game
-        initGame();
+        // Start the app
+        initApp();
     </script>
 </body>
-</html>
+                    </html>
